@@ -3,46 +3,43 @@ import React, { useState } from 'react';
 import TareaForm from './TareaForm';
 import ListaTareas from './ListaTareas';
 import Filtros from './Filtros';
+import Orden from './Orden';
+import Advertencia from './Advertencia';
 
 function App() {
   const [tareas, setTareas] = useState([]);
   const [filtro, setFiltro] = useState("Todas");
-  const [tareasFiltradas, setTareasFiltradas] = useState([]);
+  const [orden, setOrden] = useState("asc");
+  const [advertencia, setAdvertencia] = useState("");
 
-  useEffect(() => {
-    let tareasFiltradas = tareas.slice();
-
-    if (filtro === "Pendientes") {
-      tareasFiltradas = tareas.filter((tarea) => !tarea.completada);
-    } else if (filtro === "Completadas") {
-      tareasFiltradas = tareas.filter((tarea) => tarea.completada);
-    }
-
-    tareasFiltradas.sort((a, b) => a.fechaCreacion - b.fechaCreacion);
-
-    setTareasFiltradas(tareasFiltradas);
-  }, [tareas, filtro]);
-
+  const IndexbyId = (id) => {
+    return tareas.findIndex(tarea => tarea.id === id);
+  };
 
   const agregarTarea = (texto) => {
-    setTareas([...tareas, { texto, completada: false, fechaCreacion: new Date() }]);
+    if (texto ==""){
+      advertenciar("textVacio")
+    }else if( texto.length >20){
+      advertenciar("textM20")
+    }else{
+      setTareas([...tareas, {id: Date.now(), texto, completada: false }]);
+    }
   };
 
-  const eliminarTarea = (index) => {
+  const eliminarTarea = (id) => {
+    setTareas(tareas.filter((tarea) => tarea.id !== id));
+  };
+  
+
+  const editarTarea = (id, nuevoTexto) => {
     const nuevasTareas = [...tareas];
-    nuevasTareas.splice(index, 1);
+    nuevasTareas[IndexbyId(id)].texto = nuevoTexto;
     setTareas(nuevasTareas);
   };
 
-  const editarTarea = (index, nuevoTexto) => {
+  const toggleCompletada = (id) => {
     const nuevasTareas = [...tareas];
-    nuevasTareas[index].texto = nuevoTexto;
-    setTareas(nuevasTareas);
-  };
-
-  const toggleCompletada = (index) => {
-    const nuevasTareas = [...tareas];
-    nuevasTareas[index].completada = !nuevasTareas[index].completada;
+    nuevasTareas[IndexbyId(id)].completada = !nuevasTareas[IndexbyId(id)].completada;
     setTareas(nuevasTareas);
   };
 
@@ -50,13 +47,35 @@ function App() {
     setFiltro(filtro);
   };
 
+  const ordenarTareas = (orden) => {
+    setOrden(orden);
+  };
+
+  const advertenciar = (advertencia) => {
+    setAdvertencia(advertencia);
+  };
+
+  let tareasFiltradas = tareas;
+  if (filtro === "Pendientes") {
+    tareasFiltradas = tareas.filter((tarea) => !tarea.completada);
+  } else if (filtro === "Completadas") {
+    tareasFiltradas = tareas.filter((tarea) => tarea.completada);
+  }
+
+  let tareasOrdenadas = [...tareasFiltradas];
+  if (orden==="des"){
+    tareasOrdenadas.reverse();
+  }
+
   return (
     <div className="App">
       <h1>Lista de Tareas</h1>
+      <Advertencia advertencia={advertencia}/>
       <TareaForm agregarTarea={agregarTarea} />
       <Filtros filtrarTareas={filtrarTareas} />
+      <Orden ordenarTareas={ordenarTareas} />
       <ListaTareas
-        tareas={tareasFiltradas}
+        tareas={tareasOrdenadas}
         eliminarTarea={eliminarTarea}
         editarTarea={editarTarea}
         toggleCompletada={toggleCompletada}

@@ -5,14 +5,14 @@ import Tarea from './Tarea';
 function ListaTareas({ tareas, eliminarTarea, editarTarea, toggleCompletada }) {
     return (
       <ul>
-        {tareas.map((tarea, index) => (
+        {tareas.map((tarea) => (
           <Tarea
-            key={index}
+            key={tarea.id}
             tarea={tarea.texto}
             completada={tarea.completada}
-            onDelete={() => eliminarTarea(index)}
-            onEdit={(nuevoTexto) => editarTarea(index, nuevoTexto)}
-            onToggleCompletada={() => toggleCompletada(index)}
+            onDelete={() => eliminarTarea(tarea.id)}
+            onEdit={(nuevoTexto) => editarTarea(tarea.id, nuevoTexto)}
+            onToggleCompletada={() => toggleCompletada(tarea.id)}
           />
         ))}
       </ul>
